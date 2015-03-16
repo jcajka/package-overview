@@ -1,0 +1,12 @@
+{% extends "master.html" %}
+{% import 'packagetag.html' as over %}
+{% block content %}
+    {% if overview %}
+        <h1>Package: <a href='https://admin.fedoraproject.org/pkgdb/package/{{package.name}}'>{{package.name}}</h1></a>
+        {% for tag in tags if not tag.name == 'f22-updates' %}
+            <ul class='p-overview'>
+            {{over.print_buildsoverview(overview[tag.name], package.name, tag, kojis)}}
+            </ul>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

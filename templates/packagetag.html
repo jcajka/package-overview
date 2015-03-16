@@ -1,0 +1,82 @@
+{% extends "master.html" %}
+{% block content %}
+    {% if builds %}
+        <ul class='p-overview'>
+            <li><h1>Package: <a href='{{get_packagepkgdburl(package)}}'>{{package}}</a></h1></li>
+            {{ print_buildsoverview(builds, package, tag, kojis) }}
+        </ul>
+    {% else %}
+    <h1> Package {{package}}  doesn't exist.</h1>
+    {% endif %}
+{% endblock %}
+
+{% macro print_buildstate(build) -%}
+    {% if build %}
+        {% if build['state'] == 0 %}
+            <li class='building'><h3> Status: Building </h3></li>
+        {% elif build['state'] == 1 %}
+            <li class='completed' ><h3> Status: Completed </h3></li>
+        {% elif build['state'] == 2 %}
+            <li class='deleted'><h3> Status: Deleted </h3></li>
+        {% elif build['state'] == 3 %}
+            <li class='failed'><h3> Status: Failed </h3></li>
+        {% else %}
+            <li class='canceled'><h3> Status: Canceled </h3></li>
+        {% endif %}
+    {% endif %}
+{%- endmacro %}
+{% macro get_builddistanceclass(distance) -%}
+    {% if distance < 0 %}
+        bchok
+    {% elif distance == 0%}
+        bok
+    {% elif distance < 1000 %}
+        bch
+    {% else %}
+        bba
+    {% endif %}
+{%- endmacro %}
+{% macro get_packagekojiurl(build,koji) -%}
+    http://{{koji.prefix}}koji.fedoraproject.org/koji/packageinfo?packageID={{build['package_id']}}
+{%- endmacro %}
+{% macro get_buildkojiurl(build,koji) -%}
+    http://{{koji.prefix}}koji.fedoraproject.org/koji/buildinfo?buildID={{build['build_id']}}
+{%- endmacro %}
+{% macro get_tagpkgdburl(tag) -%}
+    https://admin.fedoraproject.org/pkgdb/collection/{{tag.name}}
+{%- endmacro %}
+{% macro get_packagepkgdburl(package) -%}
+    https://admin.fedoraproject.org/pkgdb/package/{{package.name}}
+{%- endmacro %}
+{% macro print_buildsoverview(builds, package, tag, kojis) -%}
+    <li><h2>Tag: <a href='{{get_tagpkgdburl(tag)}}'>{{tag.name}}</a></h2></li>
+    <ul class='tag-overview'>
+        {% for k in kojis %}
+            <div class='koji'>
+                <li><a href='{{get_packagekojiurl(builds[0][k.name][0], k)}}'><h3>{{ k.name }}</h3></a></li>
+                <li><h3>Last successful(Tagged):</h3> </li>
+                <ul class='{{ get_builddistanceclass(builds[1][k.name][0]) }}'>
+                {% if builds[0][k.name][0] %}
+                    <li class='nvr' ><a href='{{get_buildkojiurl(builds[0][k.name][0], k)}}'>{{builds[0][k.name][0]['nvr']}}</a></li>
+                    {{ print_buildstate(builds[0][k.name][0]) }}
+                {% else %}
+                    <li class='nvr' >&nbsp;</li>
+                    <li ><h3>None</h3></li>
+                {% endif %}
+                </ul>
+                <li><h3>Last attempted:</h3></li>
+                <ul class='{{ get_builddistanceclass(builds[1][k.name][1]) }}' >
+                    {% if builds[0][k.name][1]['build_id'] == builds[0][k.name][0]['build_id'] %}
+                        <li>See above</li>
+                    {% elif builds[0][k.name][1] %}
+                        <li class='nvr' ><a href='{{get_buildkojiurl(builds[0][k.name][1], k)}}'>{{builds[0][k.name][1]['nvr']}}</a></li>
+                        {{ print_buildstate(builds[0][k.name][1]) }}
+                    {% else %}
+                        <li>&nbsp;</li>
+                        <li><h3>None</h3></li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% endfor %}
+    </ul>
+{%- endmacro %}

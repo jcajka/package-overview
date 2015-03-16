@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>{% block title %}Fedora package status{% endblock %}</title>
+    <link rel="shortcut icon" type="image/vnd.microsoft.icon"
+        href="//fedoraproject.org/static/images/favicon.ico"/>
+    <link rel="stylesheet" type="text/css" media="screen"
+        href="{{ url_for('static', filename='koji.css') }}"/>
+    <link rel="stylesheet" type="text/css" media="screen"
+        href="{{ url_for('static', filename='status.css') }}"/>
+    {% block header %}{% endblock %}
+
+  </head>
+  <body id="{% block tag %}{% endblock %}"
+  >
+
+    <div id="wrap">
+      <div id="innerwrap">
+
+        <!-- HEADER -->
+        <div id="header">
+          <img src="{{ url_for('static', filename='koji.png') }}" alt="PackageDB Logo" id="kojiLogo"/>
+          <form action="/search" id="headerSearch" method='POST'>
+            <select name="tag">
+                {% for tag in activetags %}
+                <option value={{tag.name}}>{{tag.name}}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="package"/>
+            <input type="submit" value="Search"/>
+          </form>
+        </div><!-- end header --> 
+
+        <!-- MAIN NAVIGATION -->
+        <div id="mainNav">
+          <h4 class="hide">Main Site Links:</h4>
+          <ul>
+            <li id="indexTab"><a href="/">Home</a></li>
+          </ul>
+          <ul>
+            <li id="indexTab"><a href="/tags">Tags</a></li>
+          </ul>
+        </div><!-- end mainNav -->
+
+        <div id="content">
+            
+            {% block content %}{% endblock %}
+
+        </div>
+
+        {% if options is defined %}
+        <div id="options">
+            <div id="options_title">
+                <h3>{% block options_title %}Options{% endblock %}</h3>
+            </div>
+            <div id="delimiter"></div>
+            <div id="options_content">
+                {% block options %}{% endblock %}
+            </div>
+        </div>
+        {% endif %}
+
+        <p id="footer">
+          Copyright &copy; 2013-2014 Red Hat
+          <a href="">link</a>
+          -- version
+          -- <a href=""
+                target="_blank">link</a>
+        </p>
+
+      </div>
+    </div>
+
+    {% block jscripts %}
+    {% endblock %}
+
+  </body>
+</html>

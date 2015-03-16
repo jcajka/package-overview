@@ -1,0 +1,28 @@
+{% extends "master.html" %}
+{% block content %}
+{% if tags %}
+<table>
+    <tr>
+        <td><h3>Tag</h3></td>
+    {% for k in kojis %}
+        <td><h3><a href='http://{{k.prefix}}koji.fedoraproject.org/koji/tags'>{{k.name}}</a></h3></td>
+    {% endfor %}
+    </tr>
+    {% for tag in tags %}
+        <tr>
+            <td><a href='/tags/{{tag['name']}}'>{{tag['name']}}</a></td>
+        {% for k in kojis %}
+            <td>
+            {% if tag[k.name] %}
+            <a href='http://{{k.prefix}}koji.fedoraproject.org/koji/taginfo?tagID={{tag[k.name]['id']}}'>+</a>
+            {% else %}
+            -
+            {% endif %}
+            </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+{% else %}
+{% endif %}
+{% endblock %}

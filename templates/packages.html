@@ -1,0 +1,28 @@
+{% extends "master.html" %}
+{% block content %}
+{% if packages %}
+<table>
+    <tr>
+        <td><h3>Tag</h3></td>
+    {% for k in kojis %}
+        <td><h3><a href='http://{% if k == 'primary' %}{% else %}{{k}}.{% endif %}koji.fedoraproject.org/koji/tags'>{{k}}</a></h3></td>
+    {% endfor %}
+    </tr>
+    {% for tag in tags %}
+        <tr>
+            <td><a href='https://admin.fedoraproject.org/pkgdb/collection/{{tag['name']}}'>{{tag['name']}}</a></td>
+        {% for k in kojis %}
+            <td>
+            {% if tag[k+'.'] or (k == 'primary' and tag['']) %}
+            <a href='http://{% if k == 'primary' %}{% else %}{{k}}.{% endif %}koji.fedoraproject.org/koji/taginfo?tagID={% if k == 'primary' %}{{tag['']}}{% else %}{{tag[k+'.']}}{% endif %}'>+</a>
+            {% else %}
+            -
+            {% endif %}
+            </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+{% else %}
+{% endif %}
+{% endblock %}

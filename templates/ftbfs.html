@@ -1,0 +1,33 @@
+{% extends "master.html" %}
+{% block content %}
+{% import 'packagetag.html' as overview %}
+{% if issues %}
+    <div class='ftbfs-filters'>
+    <p> {{ issues|length }} failed package(s).</p>
+    <form method='GET'>
+        {% for koji in kojis %}
+        <label for="{{koji.name}}">{{koji.name}}:</label>
+        <input type="checkbox" name="{{koji.name}}" id="{{koji.name}}"{% if koji.name in request.args %}checked="checked"{%endif%}/>
+        {% endfor %}
+        <label for="sortby">Sort by:</label>
+        <select name="sortby" id="sortby"/>
+            <option value="name">name</option>
+        </select>
+        <select name="order">
+            <option value="asc"{% if "order" in request.args and request.args['order']=="asc" %}selected="selected"{% endif %}>asc</option>
+            <option value="desc"{% if "order" in request.args and request.args['order']=="desc" %}selected="selected"{% endif %}>desc</option>
+        </select>
+        <input type="submit" value="Apply"/>
+    </form>
+    </div>
+{% for package in issues %}
+    <ul class='p-overview'>
+    <li><h1>Package: <a href='https://admin.fedoraproject.org/pkgdb/package/{{package}}'>{{package}}</h1></a></li>
+    {{overview.print_buildsoverview(issues[package], package, tag, kojis)}}
+    </ul>
+    {% endfor %}
+{% else %}
+<h1> No failed builds ;).</h1>
+{% endif %}
+{% endblock %}
+
