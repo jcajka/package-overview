@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# statusweb: package overview web app 
+# statusweb: package overview web app
 # Copyright (C) 2015 Red Hat, Inc.
 # SPDX-License-Identifier:      GPL-2.0
 #
@@ -429,19 +429,41 @@ def problems(tag):
         abort(404)
     rel = get_tagrel(dtag.name)
     # get packages with failed build
-    fpackages = Package.query.join(Build).filter(Build.state == 3,
-                                                 Build.distrel == rel,
-                                                 Build.tags == None).all()
+    fpackagesq = Package.query.join(Build).filter(Build.state == 3,
+                                                  Build.distrel == rel,
+                                                  Build.tags == None)
+    # filter based on koji
+    ids = []
+    filterbykoji = False
+
+    for koji in kojis:
+        if koji.name in request.args and request.args[koji.name] == 'on':
+            ids.append(koji.id)
+            filterbykoji = True
+
+    if ids:
+        fpackagesq = fpackagesq.filter(Build.koji_id.in_(ids))
+
+    fpackages = fpackagesq.all()
+
     issues = dict()
     for package in fpackages:
         # get really failed builds
         bs = _get_packageoverview(package.name, tag, nokoji=True)
         failed = False
         #print bs
-        for hub in bs:
-            if bs[hub][1] and bs[hub][1]['state'] == 3:
-                failed = True
-                break
+        fids = []
+        for koji in kojis:
+            if bs[koji.name][1] and bs[koji.name][1]['state'] == 3:
+                if not filterbykoji:
+                    failed = True
+                    break
+                else:
+                    fids.append(koji.id)
+                    continue
+        if fids and set(ids).issubset(set(fids)):
+            failed = True
+
         if failed:
             issues[package.name] = (bs, get_distance(bs))
         else:
