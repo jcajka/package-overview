@@ -110,6 +110,8 @@ def getbuild(bid, koji):
         for tag in tags:
             _get_packageoverview(bs['package_name'], tag.name)
             db.session.commit()
+        package = Package.query.filter(Package.name == bs['package_name']).first()
+        assert package
 
     print bs['release']
     mtch = re.match(".*fc(?P<rel>\d*).*", bs['release'])
