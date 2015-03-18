@@ -553,21 +553,40 @@ class Build(db.Model):
         self.fdate = fdate
         self.bid = bid
 
+    # be able to replace build dictionary
     def __getitem__(self, key):
         if key == "version":
             return self.version
         elif key == "release":
             return self.release if self.release else ""
         elif key == "epoch":
-            return self.epoch if self.epoch else None
+            return self.epoch if self.epoch else 0
         elif key == "state":
             return self.state
         elif key == "build_id":
             return self.bid
         elif key == "nvr":
-            return Package.query.filter(Package.id == self.package_id).one().name + "-" + self.version + "-" + self.release
+            return Package.query.filter(Package.id == self.package_id).one().name + "-" + self.version + "-" +self.release
         else:
-            raise KeyError()
+            try:
+                return self.build_cached[key]
+            except AttributeError:
+                self.build_cached = json.loads(self.build)
+            return self.build_cached[key]
+
+    def __iter__(self):
+        try:
+            return self.build_cached.__iter__()
+        except AttributeError:
+            self.build_cached = json.loads(self.build)
+        return self.build_cached.__iter__()
+
+    def keys(self):
+        try:
+            return self.build_cached.keys()
+        except AttributeError:
+            self.build_cached = json.loads(self.build)
+        return self.build_cached.keys()
 
     def getevr(self):
         return (self.epoch, self.version, self.release)
