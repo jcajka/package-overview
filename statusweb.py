@@ -517,18 +517,22 @@ def packageStatus(package):
 T_TAGS = db.Table('tags',
                   db.Column('tag_id',
                             db.Integer,
-                            db.ForeignKey('tag.id')),
+                            db.ForeignKey('tag.id'),
+                            index=True),
                   db.Column('build_id',
                             db.Integer,
-                            db.ForeignKey('build.id')))
+                            db.ForeignKey('build.id'),
+                            index=True))
 # for kojia in tag
 T_KOJIS = db.Table('kojis',
                    db.Column('tag_id',
                              db.Integer,
-                             db.ForeignKey('tag.id')),
+                             db.ForeignKey('tag.id'),
+                             index=True),
                    db.Column('koji_id',
                              db.Integer,
-                             db.ForeignKey('koji.id')))
+                             db.ForeignKey('koji.id'),
+                             index=True))
 
 class Build(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -536,15 +540,15 @@ class Build(db.Model):
     epoch = db.Column(db.String)
     version = db.Column(db.String)
     release = db.Column(db.String)
-    bid = db.Column(db.Integer)
-    package_id = db.Column(db.Integer, db.ForeignKey('package.id'))
-    distrel = db.Column(db.Integer)
-    fdate = db.Column(db.DateTime)
+    bid = db.Column(db.Integer, index=True)
+    package_id = db.Column(db.Integer, db.ForeignKey('package.id'), index=True)
+    distrel = db.Column(db.Integer, index=True)
+    fdate = db.Column(db.DateTime, index=True)
     tags = db.relationship('Tag',
                            secondary=T_TAGS,
                            backref=db.backref('builds', lazy='dynamic'))
-    koji_id = db.Column(db.Integer, db.ForeignKey('koji.id'))
-    state = db.Column(db.Integer)
+    koji_id = db.Column(db.Integer, db.ForeignKey('koji.id'), index=True)
+    state = db.Column(db.Integer, index=True)
 
     def __init__(self, build, bid, pid, drel, fdate):
         self.build = build
@@ -592,8 +596,8 @@ class Build(db.Model):
         return (self.epoch, self.version, self.release)
 
 class Package(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    name = db.Column(db.String, index=True)
     builds = db.relationship('Build',
                              backref='package',
                              lazy='dynamic')
@@ -602,10 +606,10 @@ class Package(db.Model):
         self.name = name
 
 class Tag(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    name = db.Column(db.String, index=True)
     tag = db.Column(db.Text)
-    active = db.Column(db.Boolean)
+    active = db.Column(db.Boolean, index=True)
     kojis = db.relationship("Koji",
                             secondary=T_KOJIS,
                             backref=db.backref('tags', lazy='dynamic'))
@@ -617,8 +621,8 @@ class Tag(db.Model):
 
 
 class Koji(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    id = db.Column(db.Integer, primary_key=True, index=True)
+    name = db.Column(db.String, index=True)
     prefix = db.Column(db.String)
     url = db.Column(db.String)
     builds = db.relationship('Build',
