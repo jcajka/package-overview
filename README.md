@@ -4,6 +4,7 @@ Package build overview and FTBFS tracking across multiple koji instances.
 # Requirements
 
 - fedmsg
+- koji
 - python-flask
 - python-flask-sqlalchemy
 - database supported by sqlalchemy
